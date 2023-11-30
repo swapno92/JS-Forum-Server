@@ -27,6 +27,15 @@ async function run() {
 
     const postsCollection = client.db("forumDb").collection("posts");
     const votesCollection = client.db("forumDb").collection('votes');
+    const commentsCollection = client.db('forumDb').collection('comments')
+
+ app.post("/posts", async (req, res) => {
+   const newPosts = req.body;
+   // console.log(newAssignment);
+   const result = await postsCollection.insertOne(newPosts);
+   res.send(result);
+ });
+
 
     app.get("/posts", async (req, res) => {
       const result = await postsCollection.find().toArray();
@@ -37,6 +46,20 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await postsCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/post/:email", async (req, res) => {
+      const email = req.params.email;
+      const cursor = postsCollection.find({ authorEmail: email });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.delete("/posts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await postsCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -63,6 +86,32 @@ async function run() {
        const result = await votesCollection.insertOne(newVote);
        res.send(result);
      });
+
+     app.post("/comments", async (req, res) => {
+       const newComment = req.body;
+       const result = await commentsCollection.insertOne(newComment);
+       res.send(result);
+     });
+
+     app.get("/comments/:title", async (req, res) => {
+       const title = req.params.title;
+      //  title = title.replace(/\s+/g, "_");
+      //  console.log(title)
+       const cursor = commentsCollection.find({ titleID: title });
+       const result = await cursor.toArray();
+       res.send(result);
+     });
+
+      app.get("/com/:id",  async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await commentsCollection.findOne(query);
+      res.send(result);
+    });
+
+
+   
+   
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
